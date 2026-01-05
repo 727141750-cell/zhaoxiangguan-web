@@ -76,17 +76,9 @@ class _MainButtons extends StatelessWidget {
         _buildButton(
           context,
           icon: Icons.camera_alt,
-          label: '拍摄自拍',
+          label: '开始生成',
           isPrimary: true,
           source: 'camera',
-        ),
-        const SizedBox(height: 16),
-        _buildButton(
-          context,
-          icon: Icons.photo_library,
-          label: '相册上传',
-          isPrimary: false,
-          source: 'gallery',
         ),
         const SizedBox(height: 30),
         Row(
@@ -165,13 +157,9 @@ class _MainButtons extends StatelessWidget {
   }
 
   Future<void> _pickImage(BuildContext context, String source) async {
-    debugPrint('=== 开始选择图片: $source ===');
-
     final userService = context.read<UserService>();
 
-    // 检查是否登录
     if (!userService.isLoggedIn) {
-      debugPrint('用户未登录，显示登录对话框');
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -195,23 +183,8 @@ class _MainButtons extends StatelessWidget {
       return;
     }
 
-    debugPrint('用户已登录，开始选择图片');
-    final generateService = context.read<GenerateService>();
-    final ImageSource imageSource =
-        source == 'camera' ? ImageSource.camera : ImageSource.gallery;
-
-    debugPrint('调用 pickImage, imageSource = $imageSource');
-    final picked = await generateService.pickImage(imageSource);
-    debugPrint('pickImage 结果: $picked');
-
-    if (picked && context.mounted) {
-      debugPrint('图片选择成功，准备跳转到风格选择页');
-      // 跳转到风格选择页
-      Navigator.pushNamed(context, '/style');
-      debugPrint('已调用 Navigator.pushNamed(/style)');
-    } else {
-      debugPrint('图片选择失败或context已失效');
-    }
+    // 直接跳转到风格选择页（暂时跳过拍照）
+    Navigator.pushNamed(context, '/style');
   }
 
   Widget _buildFeature(String emoji, String label) {
