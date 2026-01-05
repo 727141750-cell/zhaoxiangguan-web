@@ -1,0 +1,16 @@
+workflows:
+  default-workflow:
+    name: 造像馆 Android APK
+    environment:
+      flutter: stable
+      xcode: latest
+    scripts:
+      - cd com_zhaoxiangguan_app
+      - flutter pub get
+      - flutter build apk --release
+    artifacts:
+      - com_zhaoxiangguan_app/build/app/outputs/flutter-apk/*.apk
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com  # 可选：添加你的邮箱接收构建通知
