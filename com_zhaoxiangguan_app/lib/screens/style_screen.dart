@@ -17,7 +17,7 @@ class StyleScreen extends StatelessWidget {
           child: SafeArea(
             child: Column(
               children: [
-                // 已选照片预览
+                // 照片预览区域
                 if (generateService.selectedImage != null)
                   _buildPhotoPreview(generateService),
                 // 标题
@@ -26,7 +26,7 @@ class StyleScreen extends StatelessWidget {
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      '请为您的照片选择一种风格',
+                      '请选择一种风格',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -207,6 +207,25 @@ class StyleScreen extends StatelessWidget {
     SubStyle subStyle,
   ) {
     final generateService = context.read<GenerateService>();
+
+    // 检查是否已选择照片
+    if (generateService.selectedImage == null) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('请先选择照片'),
+          content: const Text('请先拍照或从相册选择照片，然后再选择风格'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('好的'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
     generateService.selectStyle(mainStyle, subStyle.name);
 
     // 跳转到结果页

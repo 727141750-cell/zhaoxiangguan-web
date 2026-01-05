@@ -76,9 +76,17 @@ class _MainButtons extends StatelessWidget {
         _buildButton(
           context,
           icon: Icons.camera_alt,
-          label: '开始生成',
+          label: '拍照生成',
           isPrimary: true,
-          source: 'camera',
+          source: ImageSource.camera,
+        ),
+        const SizedBox(height: 16),
+        _buildButton(
+          context,
+          icon: Icons.photo_library,
+          label: '相册选择',
+          isPrimary: false,
+          source: ImageSource.gallery,
         ),
         const SizedBox(height: 30),
         Row(
@@ -100,7 +108,7 @@ class _MainButtons extends StatelessWidget {
     required IconData icon,
     required String label,
     required bool isPrimary,
-    required String source,
+    required ImageSource source,
   }) {
     return GestureDetector(
       onTap: () => _pickImage(context, source),
@@ -156,8 +164,9 @@ class _MainButtons extends StatelessWidget {
     );
   }
 
-  Future<void> _pickImage(BuildContext context, String source) async {
+  Future<void> _pickImage(BuildContext context, ImageSource source) async {
     final userService = context.read<UserService>();
+    final generateService = context.read<GenerateService>();
 
     if (!userService.isLoggedIn) {
       showDialog(
@@ -183,8 +192,12 @@ class _MainButtons extends StatelessWidget {
       return;
     }
 
-    // 直接跳转到风格选择页（暂时跳过拍照）
-    Navigator.pushNamed(context, '/style');
+    // 选择照片
+    final success = await generateService.pickImage(source);
+    if (success && context.mounted) {
+      // 跳转到风格选择页
+      Navigator.pushNamed(context, '/style');
+    }
   }
 
   Widget _buildFeature(String emoji, String label) {

@@ -88,10 +88,11 @@ app.post('/api/login', (req, res) => {
 
 app.post('/api/generate', async (req, res) => {
   try {
-    const { style, substyle, userId } = req.body;
+    const { style, substyle, userId, image } = req.body;
 
     console.log(`📸 收到生成请求: ${style} - ${substyle}`);
     console.log(`👤 用户ID: ${userId || 'guest'}`);
+    console.log(`📷 图片上传: ${image ? '是' : '否'}`);
 
     if (!style) {
       return res.status(400).json({
