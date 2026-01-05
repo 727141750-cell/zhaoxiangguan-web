@@ -15,6 +15,12 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Setup Java JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
@@ -22,13 +28,26 @@ jobs:
         channel: 'stable'
         cache: true
 
+    - name: Flutter Doctor
+      run: flutter doctor -v
+
     - name: Install dependencies
       working-directory: ./com_zhaoxiangguan_app
       run: flutter pub get
 
-    - name: Build APK (Release)
+    - name: Clean build
       working-directory: ./com_zhaoxiangguan_app
-      run: flutter build apk --release
+      run: flutter clean
+
+    - name: Build APK (Release) with verbose logging
+      working-directory: ./com_zhaoxiangguan_app
+      run: flutter build apk --release --verbose
+
+    - name: Check if APK exists
+      working-directory: ./com_zhaoxiangguan_app
+      run: |
+        echo "Checking for APK..."
+        ls -la build/app/outputs/flutter-apk/ || echo "No APK found"
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
@@ -36,11 +55,13 @@ jobs:
         name: release-apk
         path: com_zhaoxiangguan_app/build/app/outputs/flutter-apk/app-release.apk
         retention-days: 30
+      if: success()
 
-    - name: Get APK info
-      working-directory: ./com_zhaoxiangguan_app/build/app/outputs/flutter-apk
-      run: |
-        echo "APK Size:"
-        ls -lh app-release.apk
-        echo "APK SHA256:"
-        sha256sum app-release.apk
+    - name: Upload build logs
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-logs
+        path: |
+          com_zhaoxiangguan_app/build/
+          com_zhaoxiangguan_app/.gradle/
+      if: failure()
