@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>造像馆 - APP预览</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .phone-frame {
+            width: 375px;
+            height: 812px;
+            background: #000;
+            border-radius: 50px;
+            padding: 12px;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.3);
+        }
+
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: #f5f5f7;
+            border-radius: 40px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .notch {
+            width: 150px;
+            height: 30px;
+            background: #000;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 0 0 20px 20px;
+            z-index: 100;
+        }
+
+        .screen-content {
+            height: 100%;
+            overflow-y: auto;
+            padding-top: 40px;
+        }
+
+        /* 首页样式 */
+        .home-page {
+            background: linear-gradient(180deg, #fafafa 0%, #f0f0f2 100%);
+            min-height: 100%;
+            padding: 20px;
+            padding-bottom: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 150px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: bold;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 16px;
+            color: #666;
+        }
+
+        .main-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 0 30px;
+        }
+
+        .btn {
+            width: 100%;
+            height: 60px;
+            border: none;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+            color: white;
+            box-shadow: 0 8px 20px rgba(0,122,255,0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(0,122,255,0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #007AFF;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .btn-secondary:hover {
+            background: #f8f8f8;
+        }
+
+        .features {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 30px;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            color: #999;
+        }
+
+        .feature span {
+            font-size: 12px;
+        }
+
+        /* 风格选择页 */
+        .style-page {
+            background: #f5f5f7;
+            min-height: 100%;
+            padding: 20px;
+        }
+
+        .selected-photo-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            margin-bottom: 16px;
+            border: 3px solid #fff;
+        }
+
+        .selected-photo-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .page-header h2 {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .category-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            margin-top: 24px;
+            padding-left: 4px;
+        }
+
+        .category-title:first-child {
+            margin-top: 0;
+        }
+
+        .style-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .style-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .style-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+
+        .style-card-preview {
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .style-card-preview::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 100%);
+        }
+
+        .style-label {
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            letter-spacing: 1px;
+            position: relative;
+            z-index: 1;
+            padding: 4px 12px;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+            border-radius: 20px;
+        }
+
+        .style-card-info {
+            padding: 12px;
+        }
+
+        .style-card-info h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .style-card-info p {
+            font-size: 11px;
+            color: #999;
+            line-height: 1.4;
+        }
+
+        /* 主风格卡片 */
+        .main-style-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding: 0 20px;
+        }
+
+        .main-style-card {
+            aspect-ratio: 1;
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .main-style-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+
+        .main-style-preview {
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 20px;
+        }
+
+        .main-style-preview::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.5) 100%);
+        }
+
+        .main-style-label {
+            position: relative;
+            z-index: 1;
+            color: white;
+            font-size: 20px;
+            font-weight: 600;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            letter-spacing: 2px;
+        }
+
+        /* 子风格页 */
+        .substyle-page {
+            background: #f5f5f7;
+            min-height: 100%;
+            padding: 20px;
+            padding-bottom: 100px;
+            display: none;
+        }
+
+        .substyle-page.active {
+            display: block;
+        }
+
+        .substyle-page .page-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .substyle-page .page-header h2 {
+            flex: 1;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        /* 个人中心页 */
+        .profile-page {
+            background: #f5f5f7;
+            min-height: 100%;
+            padding: 20px;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+
+        .profile-info h3 {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .profile-info p {
+            font-size: 14px;
+            color: #999;
+        }
+
+        .points-card {
+            background: linear-gradient(135deg, #4A90E2 0%, #7B68EE 100%);
+            border-radius: 20px;
+            padding: 24px;
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 24px rgba(74,144,226,0.3);
+        }
+
+        .points-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .points-amount {
+            font-size: 40px;
+            font-weight: bold;
+        }
+
+        .points-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .points-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.3);
+            margin-bottom: 16px;
+        }
+
+        .points-details {
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .points-detail-item {
+            text-align: center;
+        }
+
+        .points-detail-item p {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-bottom: 4px;
+        }
+
+        .points-detail-item span {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .menu-list {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+        }
+
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .menu-item:hover {
+            background: #f8f8f8;
+        }
+
+        .menu-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .menu-info {
+            flex: 1;
+        }
+
+        .menu-info h4 {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .menu-info p {
+            font-size: 13px;
+            color: #999;
+        }
+
+        .menu-arrow {
+            color: #999;
+        }
+
+        /* 生成结果页 */
+        .result-page {
+            background: #000;
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 20px;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 50px 20px 20px;
+            background: #000;
+        }
+
+        .back-btn, .share-btn {
+            width: 44px;
+            height: 44px;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .result-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .result-image-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .generating-state {
+            text-align: center;
+            color: white;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255,255,255,0.2);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 24px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .loading-subtitle {
+            font-size: 14px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .generated-result {
+            width: 100%;
+        }
+
+        .result-image-wrapper {
+            position: relative;
+            width: 100%;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .result-image-wrapper img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .watermark {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            backdrop-filter: blur(4px);
+        }
+
+        .result-actions {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .result-btn {
+            width: 100%;
+            height: 52px;
+            border: none;
+            border-radius: 26px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .result-btn.secondary {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .result-btn.primary {
+            background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+            color: white;
+        }
+
+        .points-cost {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* 底部导航 */
+        .tab-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding-bottom: 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s;
+        }
+
+        .tab-item.active {
+            color: #007AFF;
+        }
+
+        .tab-item p {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* 页面切换 */
+        .page {
+            display: none;
+            padding-bottom: 80px;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* 响应式 */
+        @media (max-width: 400px) {
+            .phone-frame {
+                width: 100%;
+                height: 100vh;
+                border-radius: 0;
+                padding: 0;
+            }
+            .phone-screen {
+                border-radius: 0;
+            }
+            .notch {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <div class="phone-screen">
+            <div class="notch"></div>
+            <div class="screen-content">
+                <!-- 首页 -->
+                <div class="page home-page active" id="home">
+                    <div class="header">
+                        <h1>造像馆</h1>
+                        <p>自拍秒变艺术大片</p>
+                    </div>
+
+                    <div class="main-buttons">
+                        <button class="btn btn-primary" onclick="openCamera()">
+                            <span>📷</span>
+                            <span>拍摄自拍</span>
+                        </button>
+                        <button class="btn btn-secondary" onclick="openGallery()">
+                            <span>🖼️</span>
+                            <span>相册上传</span>
+                        </button>
+                    </div>
+
+                    <div class="features">
+                        <div class="feature">
+                            <span>⚡</span>
+                            <span>秒级生成</span>
+                        </div>
+                        <div class="feature">
+                            <span>🖌️</span>
+                            <span>6种风格</span>
+                        </div>
+                        <div class="feature">
+                            <span>✨</span>
+                            <span>高清无水印</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 风格页 - 主风格选择 -->
+                <div class="page style-page" id="style">
+                    <div class="selected-photo-preview" id="photoPreview" style="display: none;">
+                        <img id="previewImage" src="" alt="预览图">
+                    </div>
+                    <div class="page-header">
+                        <h2>请选择风格类型</h2>
+                    </div>
+
+                    <div class="main-style-grid">
+                        <div class="main-style-card" onclick="showSubStylePage('写真')">
+                            <div class="main-style-preview" style="background-image: url('file:///C:/Users/Administrator/Desktop/新建文件夹/风格/写真风格.jpg');">
+                                <div class="main-style-label">写真</div>
+                            </div>
+                        </div>
+                        <div class="main-style-card" onclick="showSubStylePage('艺术')">
+                            <div class="main-style-preview" style="background-image: url('file:///C:/Users/Administrator/Desktop/新建文件夹/风格/艺术风格.jpg');">
+                                <div class="main-style-label">艺术</div>
+                            </div>
+                        </div>
+                        <div class="main-style-card" onclick="showSubStylePage('古风')">
+                            <div class="main-style-preview" style="background-image: url('file:///C:/Users/Administrator/Desktop/新建文件夹/风格/古风风格.jpg');">
+                                <div class="main-style-label">古风</div>
+                            </div>
+                        </div>
+                        <div class="main-style-card" onclick="showSubStylePage('复古')">
+                            <div class="main-style-preview" style="background-image: url('file:///C:/Users/Administrator/Desktop/新建文件夹/风格/复古风格.jpg');">
+                                <div class="main-style-label">复古</div>
+                            </div>
+                        </div>
+                        <div class="main-style-card" onclick="showSubStylePage('婚纱')">
+                            <div class="main-style-preview" style="background-image: url('file:///C:/Users/Administrator/Desktop/新建文件夹/风格/婚纱风格.jpg');">
+                                <div class="main-style-label">婚纱</div>
+                            </div>
+                        </div>
+                        <div class="main-style-card" onclick="showSubStylePage('证件')">
+                            <div class="main-style-preview" style="background-image: url('file:///C:/Users/Administrator/Desktop/新建文件夹/风格/证件风格.jpg');">
+                                <div class="main-style-label">证件</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 子风格页 -->
+                <div class="page substyle-page" id="substyle">
+                    <div class="selected-photo-preview" id="photoPreview2" style="display: none;">
+                        <img id="previewImage2" src="" alt="预览图">
+                    </div>
+                    <div class="page-header">
+                        <button onclick="showPage('style')" style="background: none; border: none; font-size: 24px; cursor: pointer;">←</button>
+                        <h2 id="subStyleTitle">写真风格</h2>
+                    </div>
+
+                    <div class="style-grid" id="subStyleGrid">
+                        <!-- 子风格将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+
+                <!-- 生成结果页 -->
+                <div class="page result-page" id="result">
+                    <div class="result-header">
+                        <button class="back-btn" onclick="showPage('style')">
+                            <span>←</span>
+                        </button>
+                        <h2 id="resultStyleTitle">写真 - 日系清新</h2>
+                        <button class="share-btn" onclick="shareImage()">
+                            <span>分享</span>
+                        </button>
+                    </div>
+
+                    <div class="result-image-container">
+                        <!-- 正在生成状态 -->
+                        <div class="generating-state" id="generatingState">
+                            <div class="loading-spinner"></div>
+                            <p class="loading-text">AI 正在为你打造专属艺术照</p>
+                            <p class="loading-subtitle">请稍候...</p>
+                        </div>
+
+                        <!-- 生成完成状态 -->
+                        <div class="generated-result" id="generatedResult" style="display: none;">
+                            <div class="result-image-wrapper">
+                                <img id="resultImage" src="" alt="生成结果">
+                                <div class="watermark" id="watermark">造像馆 免费预览</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="result-actions" id="resultActions" style="display: none;">
+                        <button class="result-btn secondary" onclick="regenerateImage()">
+                            <span>🔄</span>
+                            <span>重新生成</span>
+                        </button>
+                        <button class="result-btn primary" onclick="downloadImage()">
+                            <span>⬇️</span>
+                            <span>无水印下载</span>
+                            <span class="points-cost">100积分</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 个人中心页 -->
+                <div class="page profile-page" id="profile">
+                    <div class="page-header">
+                        <h2>我的</h2>
+                    </div>
+
+                    <div class="profile-card">
+                        <div class="avatar">👤</div>
+                        <div class="profile-info">
+                            <h3>未登录</h3>
+                            <p>登录后享受更多功能</p>
+                        </div>
+                    </div>
+
+                    <div class="points-card">
+                        <div class="points-header">
+                            <div>
+                                <p class="points-label">当前积分</p>
+                                <div class="points-amount">100</div>
+                            </div>
+                            <div style="font-size: 40px;">✨</div>
+                        </div>
+                        <div class="points-divider"></div>
+                        <div class="points-details">
+                            <div class="points-detail-item">
+                                <p>下载消耗</p>
+                                <span>100积分/张</span>
+                            </div>
+                            <div class="points-detail-item">
+                                <p>可下载数</p>
+                                <span>1张</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="menu-list">
+                        <div class="menu-item">
+                            <div class="menu-icon" style="background: #E3F2FD; color: #2196F3;">✨</div>
+                            <div class="menu-info">
+                                <h4>积分充值</h4>
+                                <p>充越多省越多</p>
+                            </div>
+                            <div class="menu-arrow">›</div>
+                        </div>
+                        <div class="menu-item">
+                            <div class="menu-icon" style="background: #E8F5E9; color: #4CAF50;">🖼️</div>
+                            <div class="menu-info">
+                                <h4>我的下载</h4>
+                                <p>查看下载记录</p>
+                            </div>
+                            <div class="menu-arrow">›</div>
+                        </div>
+                        <div class="menu-item">
+                            <div class="menu-icon" style="background: #FFF3E0; color: #FF9800;">📋</div>
+                            <div class="menu-info">
+                                <h4>充值记录</h4>
+                                <p>查看充值明细</p>
+                            </div>
+                            <div class="menu-arrow">›</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 底部导航 -->
+                <div class="tab-bar">
+                    <div class="tab-item active" onclick="showPage('home')">
+                        <p>首页</p>
+                    </div>
+                    <div class="tab-item" onclick="showPage('style')">
+                        <p>风格</p>
+                    </div>
+                    <div class="tab-item" onclick="showPage('profile')">
+                        <p>我的</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 存储选中的图片和风格
+        let selectedImage = null;
+        let selectedMainStyle = null;
+        let selectedSubStyle = null;
+        let userPoints = 100; // 用户积分
+        let isGenerating = false;
+
+        // 6种主风格及子风格配置（包含隐藏的提示词）
+        const styleConfigs = {
+            '写真': {
+                '日系清新': {
+                    prompt: 'Japanese portrait photography, soft natural lighting, fresh and clean aesthetic, pastel colors, gentle smile, outdoor garden background, bokeh effect, shot on Fujifilm, 85mm lens, f/1.8, high resolution, detailed skin texture',
+                    variations: ['with cherry blossoms', 'with sunlight filtering through leaves', 'with blue sky background', 'with soft wind blowing hair', 'with natural candid expression']
+                },
+                '欧美时尚': {
+                    prompt: 'High fashion portrait, editorial photography, dramatic lighting, bold colors, confident pose, Vogue style, sharp focus, professional makeup, studio lighting, 100mm lens, high fashion magazine aesthetic',
+                    variations: ['with rim lighting', 'with colorful backdrop', 'with dramatic shadows', 'with wind machine effect', 'with intense gaze']
+                },
+                '性感风': {
+                    prompt: 'Glamour photography, elegant and alluring, tasteful sensual pose, soft golden hour lighting, warm skin tones, professional beauty lighting, fashion magazine style, shallow depth of field, 85mm portrait lens',
+                    variations: ['with silk fabric', 'with dramatic sidelighting', 'with natural body curves', 'with luxury setting', 'with confident expression']
+                },
+                '学院风': {
+                    prompt: 'Preppy style portrait, university campus background, youthful energy, bright daylight, casual chic outfit, books and library elements, natural fresh makeup, candid smile, back to school aesthetic, clean sharp focus',
+                    variations: ['with graduation cap', 'with library background', 'with autumn leaves', 'with study materials', 'with campus architecture']
+                },
+                '甜美风': {
+                    prompt: 'Sweet cute portrait, soft pastel colors, natural beauty, minimal makeup, gentle smile, bright eyes, soft diffused lighting, kawaii aesthetic, innocent charm, high key lighting, pastel pink and blue tones',
+                    variations: ['with flower accessories', 'with sparkles', 'with soft blush', 'with playful expression', 'with cute props']
+                }
+            },
+            '艺术': {
+                '时尚杂志': {
+                    prompt: 'High-end fashion magazine cover photography, dramatic editorial lighting, bold composition, high contrast, professional retouching, luxury brand aesthetic, sharp focus on eyes, confident expression, magazine quality, 4K resolution',
+                    variations: ['with neon lights', 'with geometric patterns', 'with bold colors', 'with avant-garde styling', 'with creative makeup']
+                },
+                '情节艺术': {
+                    prompt: 'Cinematic portrait photography, movie scene aesthetic, dramatic storytelling mood, atmospheric lighting, film noir influence, emotional expression, shallow depth of field, anamorphic lens look, cinematic color grading',
+                    variations: ['with rain effect', 'with dramatic shadows', 'with film grain', 'with moody atmosphere', 'with cinematic lighting']
+                },
+                '抽象艺术': {
+                    prompt: 'Abstract portrait photography, artistic distortion, creative double exposure, geometric overlays, experimental techniques, surreal aesthetic, artistic color grading, contemporary art style, museum quality composition',
+                    variations: ['with prism effects', 'with light painting', 'with mirror reflections', 'with color splashes', 'with digital art fusion']
+                },
+                '油画风': {
+                    prompt: 'Oil painting style portrait, classical art technique, rich textured brushstrokes, Rembrandt lighting, museum quality reproduction, baroque influence, dramatic chiaroscuro, classical portrait composition, master painter style',
+                    variations: ['with impasto texture', 'with romantic style', 'with classical background', 'with golden light', 'with ornate frame elements']
+                }
+            },
+            '古风': {
+                '唐朝': {
+                    prompt: 'Tang Dynasty Chinese portrait, imperial palace setting, ornate silk robes, golden phoenix crown, peony flowers, classical Chinese painting style, rich red and gold colors, dignified elegance, ancient Chinese court aesthetic',
+                    variations: ['with imperial throne', 'with palace architecture', 'with silk fans', 'with jade jewelry', 'with court ladies']
+                },
+                '宋朝': {
+                    prompt: 'Song Dynasty Chinese portrait, subtle elegance, ink wash painting influence, bamboo and plum blossom, scholarly aesthetic, refined simplicity, monochromatic colors, cultured and sophisticated, ancient Chinese literati style',
+                    variations: ['with calligraphy', 'with tea ceremony', 'with scroll painting', 'with garden pavilion', 'with scholarly robes']
+                },
+                '明朝': {
+                    prompt: 'Ming Dynasty Chinese portrait, opulent embroidered robes, pearl headdress, intricate patterns, vibrant colors, noble dignity,Forbidden City setting, imperial Chinese aesthetic, detailed costume design',
+                    variations: ['with dragon robe', 'with imperial seal', 'with porcelain vases', 'with palace garden', 'with noble court']
+                },
+                '魏晋': {
+                    prompt: 'Wei Jin Dynasty portrait, elegant flowing robes, free-spirited aesthetic, bamboo forest setting, poetic atmosphere, refined and graceful, classical Chinese beauty, ethereal quality, ancient Chinese scholarly style',
+                    variations: ['with bamboo grove', 'with guqin instrument', 'with flowing silk', 'with misty mountains', 'with poetic expression']
+                },
+                '汉服': {
+                    prompt: 'Traditional Chinese Hanfu portrait, flowing silk robes, elegant embroidery, natural outdoor setting, graceful pose, classical Chinese beauty, soft natural lighting, timeless elegance, cultural heritage photography',
+                    variations: ['with peach blossoms', 'with willow trees', 'with ancient architecture', 'with silk ribbons', 'with traditional hairpins']
+                }
+            },
+            '复古': {
+                '港风': {
+                    prompt: '1980s Hong Kong portrait photography, vintage film aesthetic, dramatic neon lighting, Wong Kar-wai movie style, rich saturated colors, film grain, nostalgic mood, Cantonese glamour, retro urban setting',
+                    variations: ['with neon signs', 'with rain-soaked streets', 'with vintage car', 'with night market', 'with rooftop view']
+                },
+                '民国': {
+                    prompt: '1930s Shanghai Republic era portrait, cheongsam qipao dress, Art Deco background, vintage sepia tones, old Shanghai glamour, nostalgic elegance, classical Chinese beauty with Western influence, vintage photograph aesthetic',
+                    variations: ['with jazz club setting', 'with vintage car', 'with Art Deco patterns', 'with cigarette holder', 'with pearl necklace']
+                },
+                '胶片': {
+                    prompt: 'Vintage film photography, Kodak Portra 400, film grain, warm color tones, nostalgic 1970s aesthetic, natural candid moment, soft lighting, retro color grading, authentic film look, classic portrait style',
+                    variations: ['with light leaks', 'with sprocket holes', 'with vintage border', 'with dated timestamp', 'with scratched film effect']
+                },
+                '黑白复古': {
+                    prompt: 'Classic black and white portrait photography, high contrast B&W, dramatic shadows, timeless monochrome aesthetic, Henri Cartier-Bresson style, natural light, silver gelatin print look, fine art photography',
+                    variations: ['with dramatic shadows', 'with rim lighting', 'with high key', 'with low key', 'with vintage texture']
+                }
+            },
+            '婚纱': {
+                '室内主纱': {
+                    prompt: 'Luxury wedding photography, elegant white wedding dress, indoor church setting, soft natural light streaming through stained glass, romantic and ethereal, professional bridal portrait, high-end wedding magazine style, exquisite details',
+                    variations: ['with flower bouquet', 'with cathedral veil', 'with romantic backlight', 'with elegant pose', 'with chapel pillars']
+                },
+                '清新森系': {
+                    prompt: 'Forest wedding photography, outdoor woodland setting, natural bohemian style, flower crown, dappled sunlight through trees, fresh and romantic, ethereal forest nymph aesthetic, soft green and white color palette',
+                    variations: ['with fairy lights', 'with fern leaves', 'with woodland flowers', 'with mossy background', 'with golden hour']
+                },
+                '中式': {
+                    prompt: 'Traditional Chinese wedding portrait, red wedding dress Qipao, phoenix crown, double happiness symbol, festive red and gold colors, auspicious decorations, classical Chinese wedding ceremony, cultural heritage photography',
+                    variations: ['with dragon and phoenix', 'with red lanterns', 'with gold jewelry', 'with traditional bed', 'with tea ceremony']
+                },
+                '浪漫夜景': {
+                    prompt: 'Romantic night wedding photography, city lights bokeh, elegant evening gown, starry night sky, moonlight illumination, magical and dreamy, outdoor nighttime setting, sparklers or fairy lights, romantic atmosphere',
+                    variations: ['with city skyline', 'with fireworks', 'with moonlit beach', 'with lanterns', 'with starry night']
+                },
+                '海边漫步': {
+                    prompt: 'Beach wedding photography, golden sunset, ocean waves, barefoot in sand, flowing white dress, sea breeze, romantic coastal setting, warm golden hour lighting, dreamy seascape, destination wedding aesthetic',
+                    variations: ['with lighthouse', 'with driftwood', 'with seashells', 'with ocean spray', 'with tropical palm']
+                }
+            },
+            '证件': {
+                '一寸': {
+                    prompt: 'Professional ID photo, 1 inch size, plain white background, professional headshot, even lighting, neutral expression, business attire, sharp focus, high resolution, official document photography, clean and professional',
+                    variations: ['with blue background', 'with gray background', 'with professional lighting', 'with formal attire', 'with confident expression']
+                },
+                '二寸': {
+                    prompt: 'Professional ID photo, 2 inch size, plain background, passport photo style, even frontal lighting, neutral expression, formal attire, sharp focus, high quality, official photography, clean composition',
+                    variations: ['with white background', 'with studio lighting', 'with professional attire', 'with formal pose', 'with clear visibility']
+                },
+                '小二寸': {
+                    prompt: 'Passport size ID photo, small 2 inch, plain background, official document photo, even professional lighting, neutral expression, formal wear, high resolution, passport photography standards, clear and sharp',
+                    variations: ['with visa photo style', 'with formal attire', 'with proper framing', 'with even lighting', 'with professional quality']
+                },
+                '五寸': {
+                    prompt: 'Large 5 inch ID photo, professional portrait, plain background, high resolution, professional headshot style, even lighting, formal attire, detailed and sharp, official photography, premium quality',
+                    variations: ['with studio backdrop', 'with professional lighting setup', 'with formal business attire', 'with confident pose', 'with retouched quality']
+                }
+            }
+        };
+
+        function showPage(pageName) {
+            // 隐藏所有页面
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            // 显示目标页面
+            document.getElementById(pageName).classList.add('active');
+
+            // 更新导航栏
+            document.querySelectorAll('.tab-item').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.currentTarget?.classList.add('active');
+
+            // 如果是从按钮跳转的，更新对应的导航
+            if (pageName === 'home') {
+                document.querySelectorAll('.tab-item')[0].classList.add('active');
+            } else if (pageName === 'style') {
+                document.querySelectorAll('.tab-item')[1].classList.add('active');
+            } else if (pageName === 'profile') {
+                document.querySelectorAll('.tab-item')[2].classList.add('active');
+            }
+        }
+
+        // 打开相机
+        function openCamera() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.capture = 'environment';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    selectedImage = file;
+                    showImagePreview(file);
+                    goToStylePage();
+                }
+            };
+            input.click();
+        }
+
+        // 打开相册
+        function openGallery() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    selectedImage = file;
+                    showImagePreview(file);
+                    goToStylePage();
+                }
+            };
+            input.click();
+        }
+
+        // 跳转到风格页
+        function goToStylePage() {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById('style').classList.add('active');
+            document.querySelectorAll('.tab-item').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-item')[1].classList.add('active');
+        }
+
+        // 显示图片预览
+        function showImagePreview(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('photoPreview');
+                const img = document.getElementById('previewImage');
+                img.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 选择风格并生成图片
+        function selectStyle(mainStyle, subStyle) {
+            selectedMainStyle = mainStyle;
+            selectedSubStyle = subStyle;
+
+            // 更新标题
+            document.getElementById('resultStyleTitle').textContent = mainStyle + ' - ' + subStyle;
+
+            // 跳转到结果页
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById('result').classList.add('active');
+
+            // 重置状态
+            document.getElementById('generatingState').style.display = 'block';
+            document.getElementById('generatedResult').style.display = 'none';
+            document.getElementById('resultActions').style.display = 'none';
+
+            // 调用API生成图片
+            generateImage();
+        }
+
+        // 获取完整的提示词（基础提示词 + 随机变化）
+        function getFullPrompt() {
+            const styleConfig = styleConfigs[selectedMainStyle]?.[selectedSubStyle];
+            if (!styleConfig) return '';
+
+            const basePrompt = styleConfig.prompt;
+            const variations = styleConfig.variations;
+
+            // 随机选择1-2个变化元素
+            const numVariations = Math.floor(Math.random() * 2) + 1;
+            const selectedVariations = [];
+
+            for (let i = 0; i < numVariations; i++) {
+                const randomIndex = Math.floor(Math.random() * variations.length);
+                if (!selectedVariations.includes(variations[randomIndex])) {
+                    selectedVariations.push(variations[randomIndex]);
+                }
+            }
+
+            // 组合提示词
+            let fullPrompt = basePrompt;
+            if (selectedVariations.length > 0) {
+                fullPrompt += ', ' + selectedVariations.join(', ');
+            }
+
+            return fullPrompt;
+        }
+
+        // 生成图片（调用后端API）
+        async function generateImage() {
+            try {
+                // 将图片转换为base64
+                const imageData = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result.split(',')[1]); // 获取base64部分
+                    reader.readAsDataURL(selectedImage);
+                });
+
+                // 获取完整的提示词
+                const fullPrompt = getFullPrompt();
+                console.log('生成提示词:', fullPrompt); // 调试用，用户看不到
+
+                // 调用后端API
+                const response = await fetch('http://121.5.33.130:3001/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        image: imageData,
+                        style: selectedMainStyle,
+                        substyle: selectedSubStyle,
+                        prompt: fullPrompt  // 传递完整的提示词到后端
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success && result.imageUrl) {
+                    // 显示生成的图片
+                    const resultImg = document.getElementById('resultImage');
+                    resultImg.src = result.imageUrl;
+
+                    // 切换到生成完成状态
+                    document.getElementById('generatingState').style.display = 'none';
+                    document.getElementById('generatedResult').style.display = 'block';
+                    document.getElementById('resultActions').style.display = 'flex';
+                    document.getElementById('watermark').style.display = 'block';
+                } else {
+                    throw new Error('生成失败');
+                }
+            } catch (error) {
+                console.error('生成错误:', error);
+
+                // 临时模拟：显示原图作为示例（实际部署时删除此部分）
+                const resultImg = document.getElementById('resultImage');
+                if (selectedImage) {
+                    resultImg.src = URL.createObjectURL(selectedImage);
+                }
+
+                document.getElementById('generatingState').style.display = 'none';
+                document.getElementById('generatedResult').style.display = 'block';
+                document.getElementById('resultActions').style.display = 'flex';
+                document.getElementById('watermark').style.display = 'block';
+            }
+        }
+
+        // 重新生成（每次使用不同的随机变化）
+        function regenerateImage() {
+            if (isGenerating) return;
+            isGenerating = true;
+
+            // 重置状态
+            document.getElementById('generatingState').style.display = 'block';
+            document.getElementById('generatedResult').style.display = 'none';
+            document.getElementById('resultActions').style.display = 'none';
+
+            // 重新生成（会自动使用新的随机提示词）
+            generateImage().finally(() => {
+                isGenerating = false;
+            });
+        }
+
+        // 下载无水印图片
+        function downloadImage() {
+            if (userPoints < 100) {
+                alert('积分不足，请前往充值');
+                return;
+            }
+
+            // 隐藏水印
+            document.getElementById('watermark').style.display = 'none';
+
+            // 下载图片
+            const resultImg = document.getElementById('resultImage');
+            const link = document.createElement('a');
+            link.href = resultImg.src;
+            link.download = '造像馆_' + selectedMainStyle + '_' + selectedSubStyle + '_' + Date.now() + '.jpg';
+            link.click();
+
+            // 扣除积分
+            userPoints -= 100;
+            alert('下载成功！消耗100积分，剩余积分：' + userPoints);
+
+            // 恢复水印
+            document.getElementById('watermark').style.display = 'block';
+        }
+
+        // 分享图片
+        function shareImage() {
+            alert('分享功能开发中...');
+        }
+
+        // 显示子风格页面
+        function showSubStylePage(mainStyle) {
+            selectedMainStyle = mainStyle;
+
+            // 更新标题
+            document.getElementById('subStyleTitle').textContent = mainStyle + '风格';
+
+            // 获取子风格列表（现在styleConfigs的结构已经改变）
+            const subStylesObj = styleConfigs[mainStyle] || {};
+            const subStyles = Object.keys(subStylesObj);
+
+            // 生成子风格卡片
+            const grid = document.getElementById('subStyleGrid');
+            grid.innerHTML = '';
+
+            subStyles.forEach(subStyle => {
+                const card = document.createElement('div');
+                card.className = 'style-card';
+                card.onclick = () => selectStyle(mainStyle, subStyle);
+
+                card.innerHTML = `
+                    <div class="style-card-preview" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <div class="style-label">${mainStyle}</div>
+                    </div>
+                    <div class="style-card-info">
+                        <h4>${subStyle}</h4>
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+
+            // 切换到子风格页
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById('substyle').classList.add('active');
+
+            // 同步预览图
+            if (selectedImage) {
+                const preview2 = document.getElementById('photoPreview2');
+                const img2 = document.getElementById('previewImage2');
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    img2.src = e.target.result;
+                    preview2.style.display = 'block';
+                };
+                reader.readAsDataURL(selectedImage);
+            }
+        }
+
+        // 修改showPage函数以支持子风格页
+        const originalShowPage = showPage;
+        showPage = function(pageName) {
+            // 隐藏所有页面
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+
+            // 处理导航栏
+            if (pageName === 'style') {
+                document.getElementById('style').classList.add('active');
+            } else if (pageName === 'substyle') {
+                document.getElementById('substyle').classList.add('active');
+            } else {
+                document.getElementById(pageName).classList.add('active');
+            }
+
+            // 更新导航栏
+            document.querySelectorAll('.tab-item').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            if (pageName === 'home') {
+                document.querySelectorAll('.tab-item')[0].classList.add('active');
+            } else if (pageName === 'style' || pageName === 'substyle') {
+                document.querySelectorAll('.tab-item')[1].classList.add('active');
+            } else if (pageName === 'profile') {
+                document.querySelectorAll('.tab-item')[2].classList.add('active');
+            }
+        };
+    </script>
+</body>
+</html>

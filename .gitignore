@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+.env
+
+# Flutter/Dart build files
+com_zhaoxiangguan_app/build/
+com_zhaoxiangguan_app/.dart_tool/
+com_zhaoxiangguan_app/.gradle/
+com_zhaoxiangguan_app/android/.gradle/
+com_zhaoxiangguan_app/android/local.properties
+com_zhaoxiangguan_app/android/key.properties
+com_zhaoxiangguan_app/android/app/zhaoxiangguan.keystore
+com_zhaoxiangguan_app/.idea/
+com_zhaoxiangguan_app/.flutter-plugins
+com_zhaoxiangguan_app/.flutter-plugins-dependencies
+
+# Claude settings
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Deployment docs (optional)
+DEPLOYMENT_*.md
+TENCENT_DEPLOY_STEPS.md
+deploy-commands.sh

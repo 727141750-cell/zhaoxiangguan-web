@@ -1,0 +1,129 @@
+# ========================================
+# 造像馆服务器部署 - 完整命令
+# ========================================
+# 请在腾讯云服务器控制台中复制以下命令并执行
+# ========================================
+
+# 1. 创建目录并进入
+mkdir -p /root/zhaoxiangguan && cd /root/zhaoxiangguan
+
+# 2. 创建 package.json
+cat > package.json << 'EOF'
+{
+  "name": "zhaoxiangguan-api",
+  "version": "1.0.0",
+  "description": "造像馆API服务",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "body-parser": "^1.20.2",
+    "node-fetch": "^2.7.0"
+  }
+}
+EOF
+
+# 3. 创建服务器文件 (server.js)
+# 注意：由于文件较大，请手动上传 server-free-huggingface.js 并重命名为 server.js
+# 或者执行下面的命令创建简化版本
+
+cat > server.js << 'SERVERCODE'
+const express = require('express');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const fetch = require('node-fetch');
+const fs = require('fs');
+const path = require('path');
+
+const app = express();
+const PORT = 3001;
+
+app.use(cors());
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(express.static('uploads'));
+
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+
+const HF_API_URL = 'https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0';
+
+app.get('/api/health', (req, res) => {
+  res.json({ success: true, message: 'Server is running', model: 'Stable Diffusion XL' });
+});
+
+app.post('/api/login', (req, res) => {
+  const { phone } = req.body;
+  res.json({
+    success: true,
+    message: '登录成功',
+    data: { userId: `user_${phone}`, phone: phone, points: 999999 }
+  });
+});
+
+app.post('/api/generate', async (req, res) => {
+  try {
+    const { style, substyle, userId } = req.body;
+    const prompts = {
+      '写真': { '日系清新': 'portrait, soft natural lighting, japanese style' },
+      '艺术': { '时尚杂志': 'portrait, magazine cover style' },
+      '古风': { '汉服': 'portrait, traditional chinese hanfu' },
+      '复古': { '港风': 'portrait, 1980s hong kong style' },
+      '婚纱': { '室内主纱': 'portrait, wedding photography' },
+      '证件': { '一寸': 'portrait, id photo' }
+    };
+    const prompt = (prompts[style] && prompts[style][substyle]) || 'portrait, beautiful';
+
+    const hfResponse = await fetch(HF_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        inputs: prompt,
+        parameters: { num_inference_steps: 25, width: 512, height: 768 }
+      })
+    });
+
+    if (!hfResponse.ok) throw new Error(`API错误: ${hfResponse.status}`);
+
+    const buffer = await hfResponse.buffer();
+    const filename = `${userId}_${Date.now()}.png`;
+    fs.writeFileSync(path.join(uploadsDir, filename), buffer);
+
+    res.json({
+      success: true,
+      imageUrl: `http://121.5.33.130:3001/uploads/${filename}`,
+      filename: filename
+    });
+  } catch (error) {
+    console.error('生成失败:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`服务器运行在 http://localhost:${PORT}`);
+  console.log(`外网访问: http://121.5.33.130:${PORT}`);
+});
+SERVERCODE
+
+# 4. 安装依赖
+npm install
+
+# 5. 安装PM2 (如果未安装)
+npm install -g pm2
+
+# 6. 启动服务
+pm2 delete zhaoxiangguan 2>/dev/null
+pm2 start server.js --name zhaoxiangguan
+pm2 save
+
+# 7. 显示状态
+pm2 status
+pm2 logs zhaoxiangguan --lines 20
+
+echo "=========================================="
+echo "✅ 部署完成!"
+echo "🌐 http://121.5.33.130:3001"
+echo "=========================================="
